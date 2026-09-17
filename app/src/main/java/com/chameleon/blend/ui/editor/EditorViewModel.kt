@@ -160,7 +160,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
 
     fun clearForeground() {
         _state.update {
-            it.copy(foreground = null, foregroundThumb = null, preview = null, autoTuned = false)
+            it.copy(foreground = null, foregroundThumb = null, preview = null)
         }
         workForeground = null
         quickForeground = null
@@ -170,7 +170,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
 
     fun clearBackground() {
         _state.update {
-            it.copy(background = null, backgroundThumb = null, preview = null, autoTuned = false)
+            it.copy(background = null, backgroundThumb = null, preview = null)
         }
         workBackground = null
         quickBackground = null
@@ -221,7 +221,6 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
                     previewAspect = prepared.background.width.toFloat() / prepared.background.height,
                     params = tuned,
                     summary = BlendEngine.summarize(prepared.analysis),
-                    autoTuned = true,
                     foregroundHasAlpha = prepared.sourceHasAlpha,
                     foregroundThumb = prepared.foregroundThumb.asImageBitmap(),
                     backgroundThumb = prepared.backgroundThumb.asImageBitmap(),
@@ -363,7 +362,6 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
                     rotationDeg = current.params.rotationDeg,
                     flipHorizontal = current.params.flipHorizontal,
                 ),
-                autoTuned = true,
             )
         }
         render(interactiveFirst = true)
@@ -396,7 +394,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
             } else {
                 tuned
             }
-            current.copy(params = merged, autoTuned = true, summary = BlendEngine.summarize(analysis))
+            current.copy(params = merged, summary = BlendEngine.summarize(analysis))
         }
         render(interactiveFirst = true)
     }
@@ -747,29 +745,6 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun startNew() {
-        _state.update {
-            it.copy(
-                screen = AppScreen.HOME,
-                foreground = null,
-                background = null,
-                foregroundThumb = null,
-                backgroundThumb = null,
-                preview = null,
-                rawPreview = null,
-                showRaw = false,
-                autoTuned = false,
-            )
-        }
-        workBackground = null
-        workForeground = null
-        workAlpha = null
-        workAnalysis = null
-        quickBackground = null
-        quickForeground = null
-        quickAlpha = null
-    }
-
     fun openEditor() {
         if (_state.value.hasBothImages) {
             _state.update { it.copy(screen = AppScreen.EDITOR) }
@@ -777,12 +752,6 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     companion object {
-        /** Working resolution for previews: quality versus latency. */
-        const val PREVIEW_MAX = 1280
-
-        /** Resolution used while the user is dragging, re-rendered on every change. */
-        const val QUICK_MAX = 640
-
         /** Copies kept inside a saved project. */
         const val PROJECT_COPY_MAX = 1600
 

@@ -2,7 +2,6 @@ package com.chameleon.blend.core.color
 
 import com.chameleon.blend.core.img.ImageOps
 import com.chameleon.blend.core.img.RasterImage
-import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cbrt
 import kotlin.math.cos
@@ -113,33 +112,6 @@ object ColorMath {
     private fun unpivot(t: Float): Float {
         val t3 = t * t * t
         return if (t3 > EPS) t3 else (116f * t - 16f) / KAPPA
-    }
-
-    /** Extracts L/a/b planes for a whole image. */
-    fun toLabPlanes(img: RasterImage): Array<FloatArray> {
-        val n = img.size
-        val lp = FloatArray(n)
-        val ap = FloatArray(n)
-        val bp = FloatArray(n)
-        val lab = FloatArray(3)
-        for (i in 0 until n) {
-            rgbToLab(img.r[i], img.g[i], img.b[i], lab)
-            lp[i] = lab[0]
-            ap[i] = lab[1]
-            bp[i] = lab[2]
-        }
-        return arrayOf(lp, ap, bp)
-    }
-
-    /** Writes Lab planes back into an image's RGB channels. */
-    fun fromLabPlanes(img: RasterImage, planes: Array<FloatArray>) {
-        val rgb = FloatArray(3)
-        for (i in 0 until img.size) {
-            labToRgb(planes[0][i], planes[1][i], planes[2][i], rgb)
-            img.r[i] = rgb[0]
-            img.g[i] = rgb[1]
-            img.b[i] = rgb[2]
-        }
     }
 
     class LabStats(
@@ -364,15 +336,6 @@ object ColorMath {
         val s = scale.coerceIn(0.05f, 1f)
         return a * s to b * s
     }
-
-    fun colorDistance(l1: FloatArray, l2: FloatArray): Float {
-        val dl = l1[0] - l2[0]
-        val da = l1[1] - l2[1]
-        val db = l1[2] - l2[2]
-        return sqrt(dl * dl + da * da + db * db)
-    }
-
-    fun nearlyEqual(a: Float, b: Float, tolerance: Float = 0.02f): Boolean = abs(a - b) <= tolerance
 
     /**
      * Chroma of the shadow / midtone / highlight bands, measured in one pass.

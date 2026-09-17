@@ -1,8 +1,6 @@
 package com.chameleon.blend.core.img
 
 import kotlin.math.abs
-import kotlin.math.ceil
-import kotlin.math.exp
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -106,71 +104,6 @@ object ImageOps {
             repeat(3) { result = boxBlurVertical(result, width, height, ry) }
         }
         return result
-    }
-
-    /** True gaussian kernel, used where a clean highlight falloff matters (rim light, glow). */
-    fun blurGaussian(plane: FloatArray, width: Int, height: Int, sigma: Float): FloatArray {
-        if (sigma <= 0.35f) return plane.copyOf()
-        val radius = min(64, ceil(sigma * 2.5f).toInt()).coerceAtLeast(1)
-        val kernel = FloatArray(radius * 2 + 1)
-        val denom = 2f * sigma * sigma
-        var sum = 0f
-        for (i in -radius..radius) {
-            val v = exp(-(i * i) / denom)
-            kernel[i + radius] = v
-            sum += v
-        }
-        for (i in kernel.indices) kernel[i] /= sum
-        val tmp = FloatArray(plane.size)
-        val out = FloatArray(plane.size)
-        for (y in 0 until height) {
-            val row = y * width
-            for (x in 0 until width) {
-                var acc = 0f
-                for (k in -radius..radius) {
-                    acc += plane[row + clampX(x + k, width)] * kernel[k + radius]
-                }
-                tmp[row + x] = acc
-            }
-        }
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                var acc = 0f
-                for (k in -radius..radius) {
-                    acc += tmp[clampY(y + k, height) * width + x] * kernel[k + radius]
-                }
-                out[y * width + x] = acc
-            }
-        }
-        return out
-    }
-
-    fun dilate(mask: FloatArray, width: Int, height: Int, radius: Int): FloatArray {
-        if (radius <= 0) return mask.copyOf()
-        val tmp = FloatArray(mask.size)
-        val out = FloatArray(mask.size)
-        for (y in 0 until height) {
-            val row = y * width
-            for (x in 0 until width) {
-                var m = 0f
-                for (k in -radius..radius) {
-                    val v = mask[row + clampX(x + k, width)]
-                    if (v > m) m = v
-                }
-                tmp[row + x] = m
-            }
-        }
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                var m = 0f
-                for (k in -radius..radius) {
-                    val v = tmp[clampY(y + k, height) * width + x]
-                    if (v > m) m = v
-                }
-                out[y * width + x] = m
-            }
-        }
-        return out
     }
 
     fun erode(mask: FloatArray, width: Int, height: Int, radius: Int): FloatArray {

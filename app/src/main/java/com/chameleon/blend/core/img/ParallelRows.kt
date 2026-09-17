@@ -20,8 +20,6 @@ object ParallelRows {
         Thread(runnable, "blend-worker").apply { isDaemon = true }
     }
 
-    val parallelism: Int get() = workerCount
-
     fun forEach(height: Int, block: (Int) -> Unit) {
         if (workerCount <= 1 || height < 48) {
             for (y in 0 until height) block(y)

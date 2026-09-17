@@ -29,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -146,9 +145,9 @@ fun ChoiceChip(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     icon: Painter? = null,
     enabled: Boolean = true,
-    modifier: Modifier = Modifier,
 ) {
     FilterChip(
         selected = selected,
@@ -230,15 +229,3 @@ fun EmptySlotHint(icon: Painter, title: String, subtitle: String) {
         )
     }
 }
-
-@Composable
-fun SoftDivider(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-    )
-}
-
-val TransparentScrim = Color(0x66000000)

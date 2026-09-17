@@ -208,14 +208,17 @@ CHAMELEON_SCREENSHOTS=1 ./gradlew :app:testDebugUnitTest --tests "*ScreenshotGen
 
 ## 图标
 
-图标资源由 `tools/generate_icon.ps1` 生成（自适应前景 / 背景 + 单色层 + 5 档密度方块与圆形位图 + README
-展示图）：
+图标资源由 `tools/generate_icon.ps1` 生成（自适应前景 / 背景 + 单色层 + README 展示图）：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools/generate_icon.ps1 -Source icon.jpg
 # 没有原图时，也可以直接用仓库里已有的自适应图层重建：
 powershell -ExecutionPolicy Bypass -File tools/generate_icon.ps1 -FromLayers
+# 仅当 minSdk < 26 时，才需要额外生成 5 档密度的传统位图：
+powershell -ExecutionPolicy Bypass -File tools/generate_icon.ps1 -LegacyBitmaps
 ```
+
+本项目 minSdk 为 29，自适应图标在所有目标设备上都会被使用，因此仓库不包含那些传统密度位图。
 
 脚本会自校验「背景层完全不透明、前景留白透明、中央有画面」，不合格直接报错，避免生成在浅色启动器上
 看起来「缺了一块」的错误资源。

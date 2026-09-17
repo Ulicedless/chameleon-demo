@@ -71,7 +71,8 @@ fun ControlPanel(
             Spacer(Modifier.height(8.dp))
             state.summary?.let { summary ->
                 Text(
-                    text = "${summary.timeLabel} · ${summary.lightLabel} · ${summary.noiseLabel}",
+                    text = "${summary.timeLabel} · ${summary.lightLabel} · " +
+                        "${summary.noiseLabel} · ${summary.detailLabel}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

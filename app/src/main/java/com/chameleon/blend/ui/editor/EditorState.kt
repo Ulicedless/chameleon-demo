@@ -44,7 +44,6 @@ data class EditorState(
     val stage: String = "",
     val loading: Boolean = false,
     val exporting: Boolean = false,
-    val autoTuned: Boolean = false,
     val foregroundHasAlpha: Boolean = false,
     val recents: List<RecentProject> = emptyList(),
     val message: String? = null,

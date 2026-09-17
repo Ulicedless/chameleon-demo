@@ -149,6 +149,7 @@ private fun ChameleonContent(
                     backgroundThumb = state.backgroundThumb,
                     recents = state.recents,
                     hasBothImages = state.hasBothImages,
+                    loading = state.loading,
                     onPickForeground = {
                         foregroundPicker.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),

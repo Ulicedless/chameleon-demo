@@ -38,16 +38,6 @@ class RasterImage(
     /** Copies colour channels but replaces alpha, used when the matting result is cached separately. */
     fun withAlpha(alpha: FloatArray): RasterImage = RasterImage(width, height, r, g, b, alpha)
 
-    fun sampleNearest(x: Int, y: Int, out: FloatArray) {
-        val cx = x.coerceIn(0, width - 1)
-        val cy = y.coerceIn(0, height - 1)
-        val i = cy * width + cx
-        out[0] = r[i]
-        out[1] = g[i]
-        out[2] = b[i]
-        out[3] = a[i]
-    }
-
     companion object {
         /** Builds a buffer from packed 0xAARRGGBB pixels. */
         fun fromArgb(pixels: IntArray, width: Int, height: Int): RasterImage {

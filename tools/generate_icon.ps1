@@ -6,8 +6,11 @@
     Generates, from <Source>:
       * res/drawable-nodpi/ic_launcher_background.png  (blurred + darkened cover, adaptive background)
       * res/drawable-nodpi/ic_launcher_foreground.png  (artwork inside the 70% safe area, adaptive foreground)
-      * res/mipmap-{m,h,x,xx,xxx}dpi/ic_launcher.png        (rounded square, transparent corners)
-      * res/mipmap-{m,h,x,xx,xxx}dpi/ic_launcher_round.png  (circle, transparent corners)
+      * docs/images/icon.png                           (README showcase, drawn like a launcher would)
+
+    With -LegacyBitmaps it also writes res/mipmap-{m,h,x,xx,xxx}dpi/ic_launcher{,_round}.png. Those
+    density bitmaps are only reachable below API 26, so the default of this project (minSdk 29) does
+    not ship them.
 
     The monochrome (themed icon) layer is a vector and is not touched here.
 
@@ -17,13 +20,15 @@
     # rebuild the density bitmaps and the README showcase from the committed adaptive layers,
     # without needing the original artwork at all:
     powershell -ExecutionPolicy Bypass -File tools/generate_icon.ps1 -FromLayers
+    powershell -ExecutionPolicy Bypass -File tools/generate_icon.ps1 -LegacyBitmaps   # only if minSdk < 26
 #>
 param(
     [string]$Source = "icon.jpg",
     [string]$Root = (Split-Path -Parent $PSScriptRoot),
     [double]$ArtFraction = 0.70,
     [double]$BackdropDarken = 0.86,
-    [switch]$FromLayers
+    [switch]$FromLayers,
+    [switch]$LegacyBitmaps
 )
 
 $ErrorActionPreference = 'Stop'
@@ -185,7 +190,10 @@ if (-not $FromLayers) {
 }
 
 $sizes = @{ 'mdpi' = 48; 'hdpi' = 72; 'xhdpi' = 96; 'xxhdpi' = 144; 'xxxhdpi' = 192 }
-foreach ($key in $sizes.Keys) {
+if (-not $LegacyBitmaps) {
+    Write-Host "skipping legacy density bitmaps (-LegacyBitmaps to generate them for minSdk < 26)"
+}
+foreach ($key in $(if ($LegacyBitmaps) { $sizes.Keys } else { @() })) {
     $size = [int]$sizes[$key]
     $dir = Join-Path $res "mipmap-$key"
     New-Item -ItemType Directory -Force -Path $dir | Out-Null

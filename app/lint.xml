@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!--
+      Adaptive launcher icons live in mipmap-anydpi-v26 by convention even though minSdk is 29:
+      AAPT2 rejects a plain "mipmap-anydpi" folder, so the version qualifier has to stay.
+    -->
+    <issue id="ObsoleteSdkInt">
+        <ignore path="src/main/res/mipmap-anydpi-v26" />
+    </issue>
+</lint>

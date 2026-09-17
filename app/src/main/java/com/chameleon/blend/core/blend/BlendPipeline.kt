@@ -515,7 +515,6 @@ object BlendPipeline {
 
         // Band statistics: a photograph's shadows and highlights do not share one colour, and
         // matching them separately is what makes the character belong to the same light.
-        val fgBands = ColorMath.bandChromaStats(layerImage, weights = layer.a)
         val bgBands = ColorMath.bandChromaStats(background, weights = region)
         val keyChromaA = analysis.keyChromaA
         val keyChromaB = analysis.keyChromaB

@@ -1,6 +1,7 @@
 package com.chameleon.blend.data
 
 import android.content.Context
+import androidx.core.content.edit
 import com.chameleon.blend.core.blend.BlendStyle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,22 +51,22 @@ class SettingsStore(context: Context) {
     }
 
     private fun write(settings: AppSettings) {
-        prefs.edit()
-            .putString("themeMode", settings.themeMode.name)
-            .putBoolean("dynamicColor", settings.dynamicColor)
-            .putBoolean("autoStyleByScene", settings.autoStyleByScene)
-            .putString("defaultStyle", settings.defaultStyle.name)
-            .putString("previewQuality", settings.previewQuality.name)
-            .putFloat("blendIntensity", settings.blendIntensity)
-            .putInt("exportMaxDimension", settings.exportMaxDimension)
-            .putString("exportFormat", settings.exportFormat.name)
-            .putInt("exportQuality", settings.exportQuality)
-            .putBoolean("autoMatting", settings.autoMatting)
-            .putFloat("mattingTolerance", settings.mattingTolerance)
-            .putFloat("mattingFeather", settings.mattingFeather)
-            .putBoolean("keepProjectHistory", settings.keepProjectHistory)
-            .putBoolean("showCompositionGuides", settings.showCompositionGuides)
-            .apply()
+        prefs.edit {
+            putString("themeMode", settings.themeMode.name)
+            putBoolean("dynamicColor", settings.dynamicColor)
+            putBoolean("autoStyleByScene", settings.autoStyleByScene)
+            putString("defaultStyle", settings.defaultStyle.name)
+            putString("previewQuality", settings.previewQuality.name)
+            putFloat("blendIntensity", settings.blendIntensity)
+            putInt("exportMaxDimension", settings.exportMaxDimension)
+            putString("exportFormat", settings.exportFormat.name)
+            putInt("exportQuality", settings.exportQuality)
+            putBoolean("autoMatting", settings.autoMatting)
+            putFloat("mattingTolerance", settings.mattingTolerance)
+            putFloat("mattingFeather", settings.mattingFeather)
+            putBoolean("keepProjectHistory", settings.keepProjectHistory)
+            putBoolean("showCompositionGuides", settings.showCompositionGuides)
+        }
     }
 
     private fun <T : Enum<T>> android.content.SharedPreferences.enumValue(

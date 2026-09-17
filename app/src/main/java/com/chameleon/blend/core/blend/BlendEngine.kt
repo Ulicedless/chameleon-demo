@@ -1,7 +1,6 @@
 package com.chameleon.blend.core.blend
 
 import com.chameleon.blend.core.color.ColorMath
-import com.chameleon.blend.core.img.ImageOps
 import com.chameleon.blend.core.img.RasterImage
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -248,27 +247,4 @@ object BlendEngine {
         chromaticAberration = 0f,
     )
 
-    /** Naive centre placement used before automatic tuning has run. */
-    fun defaultParams(fgWidth: Int, fgHeight: Int): BlendParams {
-        val aspect = fgHeight.toFloat() / max(1, fgWidth)
-        return BlendParams(
-            heightFraction = PlacementSolver.suggestedHeightFraction(fgWidth, fgHeight, 0.6f),
-            offsetY = if (aspect > 1.4f) 0.14f else 0.06f,
-        )
-    }
-
-    /** Small helper for the UI: how much of the frame the subject occupies. */
-    fun coverage(width: Int, height: Int, alpha: FloatArray): Float {
-        var sum = 0f
-        for (v in alpha) sum += v
-        return sum / (width * height).toFloat()
-    }
-
-    fun detailOf(image: RasterImage): Float {
-        val luma = FloatArray(image.size)
-        for (i in 0 until image.size) {
-            luma[i] = ColorMath.perceptiveLuma(image.r[i], image.g[i], image.b[i])
-        }
-        return ImageOps.detailEnergy(luma, image.width, image.height)
-    }
 }

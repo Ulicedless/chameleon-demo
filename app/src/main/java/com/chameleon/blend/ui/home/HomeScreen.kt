@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ fun HomeScreen(
     backgroundThumb: androidx.compose.ui.graphics.ImageBitmap?,
     recents: List<RecentProject>,
     hasBothImages: Boolean,
+    loading: Boolean = false,
     onPickForeground: () -> Unit,
     onPickBackground: () -> Unit,
     onClearForeground: () -> Unit,
@@ -127,7 +129,7 @@ fun HomeScreen(
         Spacer(Modifier.height(18.dp))
         Button(
             onClick = onStart,
-            enabled = hasBothImages,
+            enabled = hasBothImages && !loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
@@ -141,7 +143,16 @@ fun HomeScreen(
             Spacer(Modifier.width(8.dp))
             Text("开始融合", style = MaterialTheme.typography.titleMedium)
         }
-        if (!hasBothImages) {
+        if (loading) {
+            Spacer(Modifier.height(10.dp))
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "正在读取并分析照片…",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else if (!hasBothImages) {
             Spacer(Modifier.height(8.dp))
             Text(
                 text = "选好两张图片后即可进入编辑器",

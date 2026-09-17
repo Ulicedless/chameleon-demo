@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
+import androidx.core.graphics.scale
 import com.chameleon.blend.core.img.RasterImage
 import java.io.File
 import java.io.FileOutputStream
@@ -114,11 +115,10 @@ object BitmapIo {
         val longest = maxOf(bitmap.width, bitmap.height)
         if (longest <= maxSide) return bitmap
         val scale = maxSide.toFloat() / longest
-        return Bitmap.createScaledBitmap(
-            bitmap,
+        return bitmap.scale(
             (bitmap.width * scale).toInt().coerceAtLeast(1),
             (bitmap.height * scale).toInt().coerceAtLeast(1),
-            true,
+            filter = true,
         )
     }
 

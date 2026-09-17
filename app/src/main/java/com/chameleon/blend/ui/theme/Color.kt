@@ -34,7 +34,3 @@ val SurfaceContainerDark = Color(0xFF1A201E)
 val SurfaceVariantDark = Color(0xFF3F4946)
 val OnSurfaceDark = Color(0xFFDEE4E1)
 val OutlineDark = Color(0xFF899390)
-
-/** Accent used for light direction dials and other "energy" accents. */
-val AccentWarm = Color(0xFFE0A458)
-val AccentCool = Color(0xFF4EA5D9)

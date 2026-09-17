@@ -2,6 +2,7 @@ package com.chameleon.blend.data
 
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.core.graphics.scale
 import com.chameleon.blend.core.blend.BlendParams
 import com.chameleon.blend.core.blend.BlendStyle
 import com.chameleon.blend.core.blend.MattingOptions
@@ -109,11 +110,10 @@ class ProjectStore(private val context: Context) {
         val longest = maxOf(bitmap.width, bitmap.height)
         if (longest <= maxSide) return bitmap
         val scale = maxSide.toFloat() / longest
-        return Bitmap.createScaledBitmap(
-            bitmap,
+        return bitmap.scale(
             (bitmap.width * scale).toInt().coerceAtLeast(1),
             (bitmap.height * scale).toInt().coerceAtLeast(1),
-            true,
+            filter = true,
         )
     }
 }
