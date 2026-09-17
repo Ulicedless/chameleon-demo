@@ -155,13 +155,13 @@ gradlew.bat :app:assembleDebug
 
 不想自己编译的话，直接下载打包好的 APK：
 
-- **最新版 v1.1.0** → [Chameleon.v1.1.0.apk](https://github.com/Ulicedless/chameleon-demo/releases/download/v1.1.0/Chameleon.v1.1.0.apk)（21.7 MB，Android 10+）
+- **最新版 v1.1.1** → [Chameleon.v1.1.1.apk](https://github.com/Ulicedless/chameleon-demo/releases/download/v1.1.1/Chameleon.v1.1.1.apk)（21.45 MB，Android 10+）
 - 全部版本：[Releases](https://github.com/Ulicedless/chameleon-demo/releases)
 
-安装包与你自己的 v1.0.0 使用同一签名密钥，可直接覆盖升级。下载后可用以下 SHA-256 校验完整性：
+安装包与 v1.0.0 / v1.1.0 使用同一签名密钥，可直接覆盖升级。下载后可用以下 SHA-256 校验完整性（v1.1.1）：
 
 ```
-0c776a64645f5c69121406e03d23da9a87d5409afef18d045c9d0c61931dd52c
+628545516047ffcff67f100c197e21a4f174464a43b645b9cac292a556611a4d
 ```
 
 ```bash
