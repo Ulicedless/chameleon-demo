@@ -14,21 +14,34 @@
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File tools/generate_icon.ps1
     powershell -ExecutionPolicy Bypass -File tools/generate_icon.ps1 -Source new-icon.png
+    # rebuild the density bitmaps and the README showcase from the committed adaptive layers,
+    # without needing the original artwork at all:
+    powershell -ExecutionPolicy Bypass -File tools/generate_icon.ps1 -FromLayers
 #>
 param(
     [string]$Source = "icon.jpg",
     [string]$Root = (Split-Path -Parent $PSScriptRoot),
     [double]$ArtFraction = 0.70,
-    [double]$BackdropDarken = 0.86
+    [double]$BackdropDarken = 0.86,
+    [switch]$FromLayers
 )
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
 $sourcePath = if ([System.IO.Path]::IsPathRooted($Source)) { $Source } else { Join-Path $Root $Source }
-if (-not (Test-Path $sourcePath)) { throw "icon source not found: $sourcePath" }
 $res = Join-Path $Root 'app\src\main\res'
-$src = [System.Drawing.Bitmap]::FromFile($sourcePath)
+$bgLayerPath = Join-Path $res 'drawable-nodpi\ic_launcher_background.png'
+$fgLayerPath = Join-Path $res 'drawable-nodpi\ic_launcher_foreground.png'
+
+# Without the original artwork we can still rebuild everything from the two adaptive layers that are
+# committed in the repository.
+if (-not (Test-Path $sourcePath) -and (Test-Path $bgLayerPath) -and (Test-Path $fgLayerPath)) {
+    Write-Host "source '$sourcePath' not found - rebuilding from the committed adaptive layers"
+    $FromLayers = $true
+}
+$src = if ($FromLayers) { $null } else { [System.Drawing.Bitmap]::FromFile($sourcePath) }
+if (-not $FromLayers -and $null -eq $src) { throw "icon source not found: $sourcePath" }
 
 function New-Graphics([System.Drawing.Bitmap]$bmp) {
     $g = [System.Drawing.Graphics]::FromImage($bmp)
@@ -81,16 +94,34 @@ function Pad-Clamp([System.Drawing.Bitmap]$bmp) {
 }
 
 $baseR = 0; $baseG = 0; $baseB = 0; $n = 0
-for ($y = 0; $y -lt $src.Height; $y += 8) {
-    for ($x = 0; $x -lt $src.Width; $x += 8) {
-        $c = $src.GetPixel($x, $y)
-        $baseR += $c.R; $baseG += $c.G; $baseB += $c.B; $n++
+if (-not $FromLayers) {
+    for ($y = 0; $y -lt $src.Height; $y += 8) {
+        for ($x = 0; $x -lt $src.Width; $x += 8) {
+            $c = $src.GetPixel($x, $y)
+            $baseR += $c.R; $baseG += $c.G; $baseB += $c.B; $n++
+        }
     }
 }
-$base = [System.Drawing.Color]::FromArgb(255, [int]($baseR / $n), [int]($baseG / $n), [int]($baseB / $n))
-Write-Host ("icon source {0} ({1}x{2}), base colour {3},{4},{5}" -f $sourcePath, $src.Width, $src.Height, $base.R, $base.G, $base.B)
+$base = if ($n -gt 0) {
+    [System.Drawing.Color]::FromArgb(255, [int]($baseR / $n), [int]($baseG / $n), [int]($baseB / $n))
+} else {
+    [System.Drawing.Color]::FromArgb(255, 32, 32, 32)
+}
+if ($FromLayers) {
+    Write-Host "rebuilding from adaptive layers"
+} else {
+    Write-Host ("icon source {0} ({1}x{2}), base colour {3},{4},{5}" -f $sourcePath, $src.Width, $src.Height, $base.R, $base.G, $base.B)
+}
 
 function New-Backdrop([int]$size) {
+    if ($FromLayers) {
+        $layer = [System.Drawing.Bitmap]::FromFile($bgLayerPath)
+        $out = New-Object System.Drawing.Bitmap $size, $size
+        $og = New-Graphics $out
+        $og.DrawImage($layer, [System.Drawing.RectangleF]::new(0, 0, [float]$size, [float]$size))
+        $og.Dispose(); $layer.Dispose()
+        return $out
+    }
     $sw = [int]($size / 10); $sh = [int]($size / 10)
     $small = New-Object System.Drawing.Bitmap $sw, $sh
     $sg = New-Graphics $small
@@ -123,20 +154,35 @@ function New-Backdrop([int]$size) {
     return $darkened
 }
 
+# Draws the artwork layer for one icon: either the original file or the committed foreground layer.
+function Draw-Artwork($g, [int]$size) {
+    if ($FromLayers) {
+        $layer = [System.Drawing.Bitmap]::FromFile($fgLayerPath)
+        $g.DrawImage($layer, [System.Drawing.RectangleF]::new(0, 0, [float]$size, [float]$size))
+        $layer.Dispose()
+    } else {
+        $artSize = $size * $ArtFraction
+        $artOffset = ($size - $artSize) / 2
+        Draw-Cover $g $src $artOffset $artOffset $artSize $artSize
+    }
+}
+
 $adaptiveSize = 432
 $backdrop = New-Backdrop $adaptiveSize
-$backdrop.Save((Join-Path $res 'drawable-nodpi\ic_launcher_background.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+$backdrop.Save($bgLayerPath, [System.Drawing.Imaging.ImageFormat]::Png)
 
-$fg = New-Object System.Drawing.Bitmap $adaptiveSize, $adaptiveSize
-$g = New-Graphics $fg
-$art = $adaptiveSize * $ArtFraction
-$offset = ($adaptiveSize - $art) / 2
-$path = Rounded-Path $offset $offset $art $art ($art * 0.085)
-$g.SetClip($path)
-Draw-Cover $g $src $offset $offset $art $art
-$g.ResetClip(); $g.Dispose(); $path.Dispose()
-$fg.Save((Join-Path $res 'drawable-nodpi\ic_launcher_foreground.png'), [System.Drawing.Imaging.ImageFormat]::Png)
-$fg.Dispose()
+if (-not $FromLayers) {
+    $fg = New-Object System.Drawing.Bitmap $adaptiveSize, $adaptiveSize
+    $g = New-Graphics $fg
+    $art = $adaptiveSize * $ArtFraction
+    $offset = ($adaptiveSize - $art) / 2
+    $path = Rounded-Path $offset $offset $art $art ($art * 0.085)
+    $g.SetClip($path)
+    Draw-Cover $g $src $offset $offset $art $art
+    $g.ResetClip(); $g.Dispose(); $path.Dispose()
+    $fg.Save($fgLayerPath, [System.Drawing.Imaging.ImageFormat]::Png)
+    $fg.Dispose()
+}
 
 $sizes = @{ 'mdpi' = 48; 'hdpi' = 72; 'xhdpi' = 96; 'xxhdpi' = 144; 'xxxhdpi' = 192 }
 foreach ($key in $sizes.Keys) {
@@ -154,12 +200,17 @@ foreach ($key in $sizes.Keys) {
         }
         $g.SetClip($shape)
         $g.DrawImage($backdrop, [System.Drawing.RectangleF]::new(0, 0, [float]$size, [float]$size))
-        $artSize = $size * $ArtFraction
-        $artOffset = ($size - $artSize) / 2
-        $artPath = Rounded-Path $artOffset $artOffset $artSize $artSize ($artSize * 0.085)
-        $g.SetClip($artPath)
-        Draw-Cover $g $src $artOffset $artOffset $artSize $artSize
-        $g.ResetClip(); $g.Dispose(); $artPath.Dispose(); $shape.Dispose()
+        if ($FromLayers) {
+            Draw-Artwork $g $size
+        } else {
+            $artSize = $size * $ArtFraction
+            $artOffset = ($size - $artSize) / 2
+            $artPath = Rounded-Path $artOffset $artOffset $artSize $artSize ($artSize * 0.085)
+            $g.SetClip($artPath)
+            Draw-Cover $g $src $artOffset $artOffset $artSize $artSize
+            $artPath.Dispose()
+        }
+        $g.ResetClip(); $g.Dispose(); $shape.Dispose()
         $name = if ($round) { 'ic_launcher_round.png' } else { 'ic_launcher.png' }
         $out.Save((Join-Path $dir $name), [System.Drawing.Imaging.ImageFormat]::Png)
         $out.Dispose()
@@ -167,7 +218,25 @@ foreach ($key in $sizes.Keys) {
 }
 
 $backdrop.Dispose()
-$src.Dispose()
+if ($null -ne $src) { $src.Dispose() }
+
+# ---- README showcase: the icon as a launcher would draw it (squircle mask) ----
+$showcaseSize = 320
+$showcaseDir = Join-Path $Root 'docs\images'
+New-Item -ItemType Directory -Force -Path $showcaseDir | Out-Null
+$layerBg = [System.Drawing.Bitmap]::FromFile($bgLayerPath)
+$layerFg = [System.Drawing.Bitmap]::FromFile($fgLayerPath)
+$showcase = New-Object System.Drawing.Bitmap $showcaseSize, $showcaseSize
+$sg = New-Graphics $showcase
+$mask = Rounded-Path 0 0 $showcaseSize $showcaseSize ($showcaseSize * 0.235)
+$sg.SetClip($mask)
+$sg.DrawImage($layerBg, [System.Drawing.RectangleF]::new(0, 0, [float]$showcaseSize, [float]$showcaseSize))
+$sg.DrawImage($layerFg, [System.Drawing.RectangleF]::new(0, 0, [float]$showcaseSize, [float]$showcaseSize))
+$sg.ResetClip()
+$sg.Dispose(); $mask.Dispose(); $layerBg.Dispose(); $layerFg.Dispose()
+$showcase.Save((Join-Path $showcaseDir 'icon.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+$showcase.Dispose()
+Write-Host ("icon showcase written to {0}" -f (Join-Path $showcaseDir 'icon.png'))
 
 # ---- verification: the background must be opaque, the artwork must be present ----
 $checkBg = [System.Drawing.Bitmap]::FromFile((Join-Path $res 'drawable-nodpi\ic_launcher_background.png'))
