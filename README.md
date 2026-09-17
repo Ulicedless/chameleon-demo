@@ -14,6 +14,8 @@
 ![Tests](https://img.shields.io/badge/tests-28%20passing-success)
 ![Offline](https://img.shields.io/badge/processing-100%25%20on--device-blueviolet)
 ![License](https://img.shields.io/github/license/Ulicedless/chameleon-demo)
+[![Latest release](https://img.shields.io/github/v/release/Ulicedless/chameleon-demo?label=%E6%9C%80%E6%96%B0%E7%89%88&color=success)](https://github.com/Ulicedless/chameleon-demo/releases/latest)
+![Downloads](https://img.shields.io/github/downloads/Ulicedless/chameleon-demo/total)
 [![Android CI](https://github.com/Ulicedless/chameleon-demo/actions/workflows/android.yml/badge.svg)](https://github.com/Ulicedless/chameleon-demo/actions/workflows/android.yml)
 
 [功能](#功能) · [效果](#效果) · [工作原理](#工作原理) · [工程结构](#工程结构) · [构建与运行](#构建与运行) · [测试与指标](#测试与指标) · [常见问题](#常见问题)
@@ -151,7 +153,16 @@ gradlew.bat :app:assembleDebug
 产物：`app/build/outputs/apk/debug/app-debug.apk`。也可以直接用 Android Studio 打开项目，Gradle Sync 后运行
 `app` 模块。
 
-不想自己编译的话，[Releases](https://github.com/Ulicedless/chameleon-demo/releases) 里可以下载打包好的 APK。
+不想自己编译的话，直接下载打包好的 APK：
+
+- **最新版 v1.1.0** → [Chameleon.v1.1.0.apk](https://github.com/Ulicedless/chameleon-demo/releases/download/v1.1.0/Chameleon.v1.1.0.apk)（21.7 MB，Android 10+）
+- 全部版本：[Releases](https://github.com/Ulicedless/chameleon-demo/releases)
+
+安装包与你自己的 v1.0.0 使用同一签名密钥，可直接覆盖升级。下载后可用以下 SHA-256 校验完整性：
+
+```
+0c776a64645f5c69121406e03d23da9a87d5409afef18d045c9d0c61931dd52c
+```
 
 ```bash
 ./gradlew :app:testDebugUnitTest   # 28 个单元 / 渲染测试
