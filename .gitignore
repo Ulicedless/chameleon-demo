@@ -20,6 +20,11 @@ app/release/
 .externalNativeBuild/
 .cxx/
 
+# Signing material – never commit keystores or their passwords
+keystore.properties
+*.jks
+*.keystore
+
 # OS
 .DS_Store
 Thumbs.db
