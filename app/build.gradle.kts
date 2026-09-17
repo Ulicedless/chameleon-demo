@@ -30,8 +30,8 @@ android {
         // WRITE_EXTERNAL_STORAGE permission dance from the export flow.
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.1"
+        versionCode = 2
+        versionName = "1.1.1"
         vectorDrawables { useSupportLibrary = true }
     }
 
